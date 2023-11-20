@@ -1,0 +1,12 @@
+juegosPanamericanos.CRUD$3
+juegosPanamericanos.CRUD$10
+juegosPanamericanos.CRUD$2
+juegosPanamericanos.CRUD$1
+juegosPanamericanos.CRUD$7
+juegosPanamericanos.CRUD$6
+juegosPanamericanos.CRUD$5
+juegosPanamericanos.CRUD$4
+juegosPanamericanos.CRUD$9
+juegosPanamericanos.CRUD$8
+juegosPanamericanos.CRUD
+juegosPanamericanos.CRUD$11
