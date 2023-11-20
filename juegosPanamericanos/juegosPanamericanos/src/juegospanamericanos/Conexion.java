@@ -25,7 +25,7 @@ public class Conexion {
             System.out.println("Se conecto a "+bd);
         } catch (Exception ex){
             //java.util.logging.Logger.getLogger(Conexion.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            System.out.println("No se conecto a "+bd + ex);
+            System.out.println("No se conecto a "+bd+ " " + ex);
         }
     }
     public Connection getConnection(){
