@@ -1,5 +1,6 @@
 *.xml
 .properties
 nbproject/
-juegosPanamericanos/juegosPanamericanos/nbproject/
+juegosPanamericanos/juegosPanamericanos/nbproject
+juegosPanamericanos/juegosPanamericanos/nbproject/build-impl.xml
 juegosPanamericanos/juegosPanamericanos/nbproject/build-impl.xml
