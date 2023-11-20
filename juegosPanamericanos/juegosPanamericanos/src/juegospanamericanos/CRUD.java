@@ -1073,7 +1073,12 @@ void calcular(){
         }catch(Exception e){
             System.out.println("la entrada no es un numero valido");
             }
-    }    
+    }   
+void andres(){
+    
+}
+        
+           
 
 
 
