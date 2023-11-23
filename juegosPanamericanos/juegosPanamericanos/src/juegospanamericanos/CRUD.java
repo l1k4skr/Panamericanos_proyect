@@ -1,108 +1,131 @@
-
-
 package juegospanamericanos;
-import juegospanamericanos.Conexion;
+
 //Import para imagenes 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 
 //Import para el sql
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.DriverManager;
 import java.sql.*;
-
-//import para herramientas
-import javax.swing.JOptionPane;
-
-// Para manejar combobox, jframe,jpanel
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 
 //Para manejar las tablas 
 import javax.swing.table.DefaultTableModel;
-import java.lang.NumberFormatException;
-import javax.swing.table.TableColumn;
 
 // Para las listas
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
 
-
-
-
-
-
 public class CRUD extends javax.swing.JFrame {
-    private Connection con;
-    
-     
 
-   
-    
+    // Variables del CRUD deben ir aca
+    // Conexion con base de datos
+    private Connection con;
+
     // usar la herramienta de DefaultTableModel
     DefaultTableModel dtm = new DefaultTableModel();
     DefaultTableModel nat = new DefaultTableModel();
-    
+
     public CRUD() {
-    initComponents();
-    //Para colocar los titulos de la tabla 1
-    Conexion bd = new Conexion("panamericanos");
-    this.con = bd.getConnection();
-    
-    
-    
-    String[] titulo = new String[]{"PAIS","ORO","PLATA","BRONCE","TOTAL"};
-    dtm.setColumnIdentifiers(titulo);
-    tablaMedallas.setModel(dtm);
-    
-    
-    //Para colocar los titulos de la tabla 2
-    
-    String[] titulo_nat = new String[]{"Nombre","País","Nota 1", "Nota 2", "Nota 3", "Nota 4", "Nota 5", "Nota 6", "Nota 7", "Nota 8", "Factor", "N.F" };
-    nat.setColumnIdentifiers(titulo_nat);
-    tablaNotas.setModel(nat);
-    
-//--------------------------Bloque para colocar banderas en la primera ventana-----------------//        
-        
-    String[] imageNames = {"arg.png","Brasil.png", "bolivia.png", "chile.png","colombia.png","Canada.png","Cuba.png","EEUU.png","Peru.png","Mexico.png","Republica Dominicana.png"};
+        initComponents();
+        // Para colocar los titulos de la tabla 1
+        Conexion bd = new Conexion("panamericanos");
+        this.con = bd.getConnection();
 
-// Tamaño objetivo para las imágenes
-    int targetWidth = 150;
-    int targetHeight = 100;
+        String[] titulo = new String[] { "PAIS", "ORO", "PLATA", "BRONCE", "TOTAL" };
+        dtm.setColumnIdentifiers(titulo);
+        tablaMedallas.setModel(dtm);
 
-// Crea un DefaultComboBoxModel para el JComboBox
-    DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(imageNames);
+        // Para colocar los titulos de la tabla 2
+
+        String[] titulo_nat = new String[] { "Nombre", "País", "Nota 1", "Nota 2", "Nota 3", "Nota 4", "Nota 5",
+                "Nota 6", "Nota 7", "Nota 8", "Factor", "N.F" };
+        nat.setColumnIdentifiers(titulo_nat);
+        tablaNotas.setModel(nat);
+
+        // --------------------------Bloque para colocar banderas en la primera ventana-----------------//
+
+        String[] imageNames = { "Argentina.png", "Brasil.png", "Bolivia.png", "Chile.png", "Colombia.png", "Canada.png",
+                "Cuba.png", "EEUU.png", "Peru.png", "Mexico.png", "Republica Dominicana.png" };
+        String[] imageNames_correct = { "Argentina.png", "Brasil.png", "Bolivia.png", "Chile.png", "Colombia.png",
+                "Canada.png", "Cuba.png", "EEUU.png", "Peru.png", "Mexico.png", "Republica Dominicana.png" };
+
+        // Eliminar ".png" de cada nombre de imagen
+        for (int i = 0; i < imageNames.length; i++) {
+            imageNames_correct[i] = imageNames[i].replaceAll("\\.png$", "");
+            ;
+        }
+
+        // Imprimir los nombres de imagen actualizados
+        for (String imageNameses : imageNames_correct) {
+            System.out.println(imageNameses);
+        }
+
+        // Tamaño objetivo para las imágenes
+        int targetWidth = 150;
+        int targetHeight = 100;
+
+        // Crea un DefaultComboBoxModel para el JComboBox
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(imageNames_correct);
         combo_pais.setModel(model);
 
-// Listener para el JComboBox que muestra la imagen seleccionada
-    combo_pais.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            int selectedIndex = combo_pais.getSelectedIndex();
-            if (selectedIndex != -1) {
-                String selectedImageName = imageNames[selectedIndex];
-                ImageIcon selectedImageIcon = new ImageIcon(getClass().getResource("/recursos/" + selectedImageName));
+        // Listener para el JComboBox que muestra la imagen seleccionada
+        combo_pais.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                int selectedIndex = combo_pais.getSelectedIndex();
+                if (selectedIndex != -1) {
 
-                // Escala la imagen al tamaño objetivo
-                Image selectedImage = selectedImageIcon.getImage();
-                Image scaledImage = selectedImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
-                ImageIcon scaledIcon = new ImageIcon(scaledImage);
-                jLabel1.setIcon(scaledIcon); 
+                    String selectedImageName = imageNames[selectedIndex];
+                    ImageIcon selectedImageIcon = new ImageIcon(
+                            getClass().getResource("/recursos/" + selectedImageName));
+
+                    // Escala la imagen al tamaño objetivo
+                    Image selectedImage = selectedImageIcon.getImage();
+                    Image scaledImage = selectedImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+                    ImageIcon scaledIcon = new ImageIcon(scaledImage);
+                    jLabel1.setIcon(scaledIcon);
+                }
+            }
+        });
+        try {
+
+            ResultSet rs = read("medallas", this.con);
+
+            while (rs.next()) {
+
+                int id = rs.getInt(1);
+                String nombre = rs.getString("nombre");
+                int oro = rs.getInt("oro");
+                int plata = rs.getInt("plata");
+                int bronce = rs.getInt("bronce");
+                int total_ = rs.getInt("total");
+
+                this.dtm.addRow(new Object[] {
+                        nombre, oro, plata, bronce, total_
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // -------------------------- Funciones SQL -----------------//
+
+    private static String removeNombreColumn(String columns) {
+        String[] parts = columns.split(",\s*");
+        StringBuilder newColumns = new StringBuilder();
+
+        for (String part : parts) {
+            if (!part.startsWith("nombre")) {
+                if (newColumns.length() > 0) {
+                    newColumns.append(", ");
+                }
+                newColumns.append(part);
             }
         }
-    });
-}
-//--------------------------Bloque para colocar banderas en la primera ventana-----------------//   
-private static String removeIdColumn(String columns) {
+        return newColumns.toString();
+    }
+        private static String removeIdColumn(String columns) {
         String[] parts = columns.split(",\s*");
         StringBuilder newColumns = new StringBuilder();
 
@@ -116,33 +139,92 @@ private static String removeIdColumn(String columns) {
         }
         return newColumns.toString();
     }
-public ResultSet read(String tableName) throws SQLException {
+
+    // Funcion para leer la base de datos
+    public ResultSet read(String tableName, Connection conn) throws SQLException {
+        System.out.println("Esto es this.con: " + conn);
         String sql = "SELECT * FROM " + tableName;
-        Statement st = con.createStatement();
+        Statement st = conn.createStatement();
         return st.executeQuery(sql);
     }
 
-public void create(String tableName, Object[] values) {
-        try {
-            String columns = ColumnNameFetcher.getColumnNames(con, tableName);
-            System.out.println(columns);
-            columns = removeIdColumn(columns);
-            System.out.println(columns);
+    // Funcion para leer el ultimo id de la base de datos
+    public ResultSet read_last_id(String tableName, String column_name) throws SQLException {
+        String sql = "SELECT MAX('" + column_name + "') FROM " + tableName;
+        Statement st = this.con.createStatement();
+        return st.executeQuery(sql);
+    }
+
+    // Funcion para borrar un id de la base de datos
+    public void deleteRow(String tableName, int rowIndex) throws SQLException {
+        String sql = "DELETE FROM " + tableName + " WHERE idColumn = ?;";
+        try (Connection conn = this.con;
+        
+            PreparedStatement statement = conn.prepareStatement(sql)) {
+
+            conn.setAutoCommit(false); // Start a transaction
             
+            statement.setInt(1, rowIndex); // Establece el índice de la fila seleccionada como parámetro para la consulta SQL
+
+            statement.executeQuery();
+
+            conn.commit(); // Commit the transaction
+        } 
+        catch (SQLException e) {
+            if (this.con != null) {
+                this.con.rollback(); // Rollback the transaction if an exception occurs
+            }
+            throw e;
+        }
+    }
+
+    // Funcion para borrar toda la base de datos
+    public void deleteAll(String tableName) throws SQLException {
+        if (!isValidTableName(tableName)) {
+            throw new IllegalArgumentException("Nombre de tabla inválido: " + tableName);
+        }
+
+        String sql = "DELETE FROM " + tableName + ";";
+
+        try (Connection conn = this.con;
+                PreparedStatement statement = conn.prepareStatement(sql)) {
+
+//            conn.setAutoCommit(false);
+
+               statement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+
+    // Funcion auxiliar para validar el nombre de la tabla
+    private boolean isValidTableName(String tableName) {
+        return tableName.matches("[a-zA-Z0-9_]+");
+    }
+
+    // Funcion para crear un dato de la base de datos
+    public void create(String tableName, Object[] values) {
+        try {
+            String columns = ColumnNameFetcher.getColumnNames(this.con, tableName);
+            // System.out.println(columns);
+            columns = removeIdColumn(columns);
+            // System.out.println(columns);
+
             String sql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (";
 
             for (int i = 0; i < values.length; i++) {
                 sql += (i == 0) ? "?" : ", ?";
             }
             sql += ")";
-            System.out.println(sql);
+            // System.out.println(sql);
 
-            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-                
+            try (PreparedStatement pstmt = this.con.prepareStatement(sql)) {
+
                 for (int i = 0; i < values.length; i++) {
                     pstmt.setObject(i + 1, values[i]);
                 }
-                System.out.println(pstmt);
+                // System.out.println(pstmt);
                 pstmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -150,11 +232,36 @@ public void create(String tableName, Object[] values) {
         }
     }
 
-   public void update(String tableName, int id, Object[] values) {
+    // Funcion para actualizar un dato de la base de datos (funcion alternativa)
+    public void update_(String tabla, int id, Object[] nuevosValores) throws SQLException {
+        String sql = "UPDATE " + tabla
+                + " SET numero_oro = ?, numero_plata = ?, numero_bronce = ?, total = ? WHERE id = ?";
+        try (Connection conn = this.con;
+                PreparedStatement statement = conn.prepareStatement(sql)) {
+            for (int i = 0; i < nuevosValores.length; i++) {
+                statement.setObject(i + 1, nuevosValores[i]);
+            }
+            statement.setInt(nuevosValores.length + 1, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Funcion para actualizar un dato de la base de datos
+    public void update_medallas(String tableName, Object[] values, String pais) {
         try {
-            String columns = ColumnNameFetcher.getColumnNames(con, tableName);
+            String columns = ColumnNameFetcher.getColumnNames(this.con, tableName);
+            System.out.println(columns);
+
             columns = removeIdColumn(columns);
+            System.out.println(columns);
+
+            columns = removeNombreColumn(columns);
+            System.out.println(columns);
+
             String[] parts = columns.split(",\s");
+
 
             // Construye la parte SET de la sentencia SQL
             StringBuilder setClause = new StringBuilder();
@@ -166,14 +273,15 @@ public void create(String tableName, Object[] values) {
             }
 
             // Construye la sentencia SQL completa
-            String sql = "UPDATE " + tableName + " SET " + setClause + " WHERE id = ?";
+            System.out.println(setClause);
+            String sql = "UPDATE " + tableName + " SET " + setClause + " WHERE nombre = ?";
 
             // Prepara el statement y asigna los valores
-            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = this.con.prepareStatement(sql)) {
                 for (int i = 0; i < values.length; i++) {
                     pstmt.setObject(i + 1, values[i]);
                 }
-                pstmt.setInt(values.length + 1, id);
+                pstmt.setString(values.length + 1, pais);
 
                 // Ejecuta la actualización
                 int affectedRows = pstmt.executeUpdate();
@@ -184,9 +292,10 @@ public void create(String tableName, Object[] values) {
         }
     }
 
-    // ... (resto de la clase CRUD)
 
     @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -332,22 +441,26 @@ public void create(String tableName, Object[] values) {
 
         jButton1.setText("Modificar");
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton1MouseClicked(evt);
+            
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jButton1MousePressed(evt);
             }
         });
 
         jButton4.setText("Agregar");
         jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton4MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jButton4MousePressed(evt);
             }
         });
 
         jButton3.setText("Eliminar");
         jButton3.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton3MouseClicked(evt);
+            
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jButton3MousePressed(evt);
             }
         });
 
@@ -528,7 +641,7 @@ public void create(String tableName, Object[] values) {
         });
 
         jButton6.setText("Calcular");
-
+        jButton6.
         jLabel17.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel17.setText("Factor");
 
@@ -847,189 +960,248 @@ public void create(String tableName, Object[] values) {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void numOroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_numOroActionPerformed
+    private void jButton1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MousePressed
+        modificar();
         // TODO add your handling code here:
-    }//GEN-LAST:event_numOroActionPerformed
+    }//GEN-LAST:event_jButton1MousePressed
 
-    private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
-        Agregar();
-    }//GEN-LAST:event_jButton4MouseClicked
-
-    private void Nota6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Nota6ActionPerformed
+    private void jButton3MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MousePressed
+        borrarTodo();
         // TODO add your handling code here:
-    }//GEN-LAST:event_Nota6ActionPerformed
+    }//GEN-LAST:event_jButton3MousePressed
 
-    private void textNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textNombreActionPerformed
+    private void jButton4MousePressed(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_jButton4MousePressed
+        agregar();
+    }
+
+    private void numOroActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_numOroActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_textNombreActionPerformed
+    }// GEN-LAST:event_numOroActionPerformed
 
-    private void Nota3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Nota3ActionPerformed
+    private void Nota6ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_Nota6ActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_Nota3ActionPerformed
+    }// GEN-LAST:event_Nota6ActionPerformed
 
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-     modificar();
-    }//GEN-LAST:event_jButton1MouseClicked
-
-    private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
-    eliminar();        
-    }//GEN-LAST:event_jButton3MouseClicked
-
-    private void FactorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FactorActionPerformed
+    private void textNombreActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_textNombreActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_FactorActionPerformed
+    }// GEN-LAST:event_textNombreActionPerformed
 
-    private void agregar_notasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_agregar_notasMouseClicked
-    agregarNotas();
-    }//GEN-LAST:event_agregar_notasMouseClicked
+    private void Nota3ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_Nota3ActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_Nota3ActionPerformed
 
-  
-    public static void main(String args[]) {
-        CRUD crud = new CRUD();
-        Object[] valores = {"Chile", 16, 20, 30, 66};
-        //crud.create("medallas", valores);
-       
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run(){
-                crud.setVisible(true);
-               // ResulSet rs = read(); 
+
+    private void FactorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_FactorActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_FactorActionPerformed
+
+    private void agregar_notasMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_agregar_notasMouseClicked
+        agregarNotas();
+    }// GEN-LAST:event_agregar_notasMouseClicked
+
+    String validacionNumerica( String validacion1, String validacion2, String validacion3) {
+        System.out.println(validacion1);
+        System.out.println(validacion2);
+        System.out.println(validacion3);
+        if ( validacion1 == "" || validacion2 == "" || validacion3 == "") {
+
+            return "Problemas en el codigo.";
+        } else {
+            return "Todo bien";
+        }
+    }
+
+   
+
+    // -----------------------------------------------Botones Medallas -------------------------------------------//
+
+    // Funcion para el boton agregar de la ventana 1
+    void agregar() {
+        // System.out.println("Boton agregar precionado");
+        System.out.println("Boton borrar precionado");
+        System.out.println(con);
+        System.out.println(this.con);
+        try {
+            String pais = combo_pais.getItemAt(combo_pais.getSelectedIndex());
+            Conexion bd = new Conexion("panamericanos");
+            this.con = bd.getConnection();
+            ResultSet rs_view = read("medallas", this.con);
+
+            while (rs_view.next()) {
                 
-              
+                if (pais.equals(rs_view.getString("nombre"))) {
+
+                    System.out.println("Pais repetido");
+                    throw new Exception("Pais repetido");
+                }
+            } 
+
+            int numero_oro = Integer.parseInt(numOro.getText());
+            int numero_plata = Integer.parseInt(numPlata.getText());
+            int numero_bronce = Integer.parseInt(numBronce.getText());
+            int total = numero_oro + numero_plata + numero_bronce;
+
+            Object[] valores = { pais, numero_oro, numero_plata, numero_bronce, total };
+            create("medallas", valores);
+
+            borrarTabla();
+
+            ResultSet rs = read("medallas", this.con);
+
+            while (rs.next()) {
+
+                int id = rs.getInt(1);
+                String nombre = rs.getString("nombre");
+                int oro = rs.getInt("oro");
+                int plata = rs.getInt("plata");
+                int bronce = rs.getInt("bronce");
+                int total_ = rs.getInt("total");
+
+                this.dtm.addRow(new Object[] {
+                        nombre, oro, plata, bronce, total_
+                });
             }
-        });
-        try{
-         ResultSet rs = crud.read("medallas");
-         System.out.println(rs);
-         while(rs.next()){
-             
-            int id = rs.getInt(1);             
-            String nombre = rs.getString(2);
-            int oro = rs.getInt(3);
-            int plata = rs.getInt(4);
-            int bronce = rs.getInt(5);
-            int total = rs.getInt(6);
-            crud.dtm.addRow(new Object[]{
-            nombre, oro, plata, bronce, total
-        });
-         }
-        }catch(SQLException e){
-            e.printStackTrace();   
-        }
-         
-    }
-    
-//-----------------------------------------------Botones tabla 1-------------------------------------------//
-    
-    //Funcion para el boton agregar de la ventana 1 
-    void Agregar(){
-        int numero_oro = Integer.parseInt(numOro.getText());
-        int numero_plata = Integer.parseInt(numPlata.getText());
-        int numero_bronce = Integer.parseInt(numBronce.getText());
-        int total = numero_oro + numero_plata + numero_bronce;
-        try{
-         ResultSet rs = this.read("medallas");
-         System.out.println(rs);
-         while(rs.next()){
-             
-            int id = rs.getInt(1);             
-            String nombre = rs.getString(2);
-            int oro = rs.getInt(3);
-            int plata = rs.getInt(4);
-            int bronce = rs.getInt(5);
-           // int total = rs.getInt(6);
-            this.dtm.addRow(new Object[]{
-            nombre, oro, plata, bronce, total
-        });
-         }
-        }catch(SQLException e){
-            e.printStackTrace();   
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.out.println("Error de formato numérico: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error general: " + e.getMessage());
         }
     }
-    
-   void borrarTodo() {
-    int rowCount = dtm.getRowCount();
-
-    // Borrar todas las filas de la tabla
-    for (int i = rowCount - 1; i >= 0; i--) {
-        dtm.removeRow(i);
-    }
-} 
-    
-    void actualizar_tabla(){
-        try{
-         ResultSet rs = this.read("medallas");
-         System.out.println(rs);
-         while(rs.next()){
-             
-            int id = rs.getInt(1);             
-            String nombre = rs.getString(2);
-            int oro = rs.getInt(3);
-            int plata = rs.getInt(4);
-            int bronce = rs.getInt(5);
-            int total = rs.getInt(6);
-            this.dtm.addRow(new Object[]{
-            nombre, oro, plata, bronce, total
-        });
-         }
-        }catch(SQLException e){
-            e.printStackTrace();   
+    void borrarTabla(){
+        int rowCount = dtm.getRowCount();
+        for (int i = rowCount - 1; i >= 0; i--) {
+            dtm.removeRow(i);
         }
     }
-
-    //Funcion para el boton eliminar de la ventana 1
-    void eliminar(){
-        int fila = tablaMedallas.getSelectedRow();
-        dtm.removeRow(fila);
-    }
-       //Funcion para el boton modificar de la ventana 1
-    void modificar(){
-        int fila = tablaMedallas.getSelectedRow();
-
-        int numero_oro = Integer.parseInt(numOro.getText());
-        int numero_plata = Integer.parseInt(numPlata.getText());
-        int numero_bronce = Integer.parseInt(numBronce.getText());
+    void borrarTodo() {
         
-        dtm.setValueAt(numero_oro, fila, 1);
-        dtm.setValueAt(numero_plata, fila, 2);
-        dtm.setValueAt(numero_bronce, fila, 3);
-         int total = numero_oro + numero_plata + numero_bronce;
-        dtm.setValueAt(total, fila, 4);
-        
+        // Borrar todas las filas de la interfaz
+        int rowCount = dtm.getRowCount();
+        for (int i = rowCount - 1; i >= 0; i--) {
+            dtm.removeRow(i);
+        }
+        try {
+            System.out.println("Se ejecuta");
+            deleteAll("medallas");
+            System.out.println("Se ejecuta");
+            System.out.println(this.con);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
-//-----------------------------------------------Botones tabla 1-------------------------------------------//
 
- //----------------------------------------------Botones tabla 2-------------------------------------------//
-    
-    //Funcion para el boton para agregar notas de la ventana 2
-    void agregarNotas(){
-        try{
-            String nombre_atleta = textNombre.getText();
-            String pais_atleta = textPais.getText();
-    
-            float factor_notas = Integer.parseInt(Factor.getText());
-            float nota_1 = Float.parseFloat(Nota1.getText());
-            float nota_2 = Float.parseFloat(Nota2.getText());
-            float nota_3 = Float.parseFloat(Nota3.getText());
-            float nota_4 = Float.parseFloat(Nota4.getText());
-            float nota_5 = Float.parseFloat(Nota5.getText());
-            float nota_6 = Float.parseFloat(Nota6.getText());
-            float nota_7 = Float.parseFloat(Nota7.getText());
-            float nota_8 = Float.parseFloat(Nota8.getText());
-    
-            nat.addRow(new Object[]{
-                nombre_atleta, pais_atleta, nota_1, nota_2, nota_3, nota_4, nota_5, nota_6, nota_7, nota_8, factor_notas
-      
-            }); 
-        }catch(Exception e){
-            System.out.println("la entrada no es un numero valido");
+    // Funcion para el boton modificar de la ventana 1
+    void modificar() {
+        // Obtener la fila seleccionada en la interfaz
+        
+        String numeroString = numOro.getText();
+        String numeroString1 = numPlata.getText();
+        String numeroString2 = numBronce.getText();
+        String pais = combo_pais.getItemAt(combo_pais.getSelectedIndex());
+        int fila = -1;
+        int numero_filas = tablaMedallas.getRowCount();
+        for (int i = 0; i < numero_filas; i++){
+            if ( pais.equals(tablaMedallas.getValueAt(i, 0))){
+                fila = i;
+                break;
+            }
+        }
+        
+        if (validacionNumerica( numeroString, numeroString1, numeroString2) != "Problemas en el codigo.") {
+
+            // Obtener los nuevos valores desde los campos de texto
+            int numero_oro = Integer.parseInt(numeroString);
+            int numero_plata = Integer.parseInt(numeroString1);
+            int numero_bronce = Integer.parseInt(numeroString2);
+            System.out.println("Numero_oro: " + numero_oro);
+            System.out.println("Numero_plata: " + numero_plata);
+            System.out.println("Numero_bronce: " + numero_bronce);
+            System.out.println("Numero_FILA" + fila);
+
+            // Actualizar las filas en la interfaz
+            dtm.setValueAt(numero_oro, fila, 1);
+            dtm.setValueAt(numero_plata, fila, 2);
+            dtm.setValueAt(numero_bronce, fila, 3);
+            int total = numero_oro + numero_plata + numero_bronce;
+            dtm.setValueAt(total, fila, 4);
+
+            // Actualizar los datos en la base de datos
+            try {
+                System.out.println("Cago 1");
+
+              
+                System.out.println("Cago 2");
+
+                // Actualizar los datos en la base de datos
+                System.out.println(pais);
+                Object[] nuevosValores = { numero_oro, numero_plata, numero_bronce, total};
+                update_medallas("medallas", nuevosValores, pais);
+            } catch (NumberFormatException e) {
+                System.out.println("Error de formato numérico: " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Error general: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Problemas en el codigo.");
+        }
+    }
+
+    // ---------------------------------------------- Botones Notas -------------------------------------------//
+
+    // Funcion para el boton para agregar notas de la ventana 2
+    void agregarNotas() {
+
+        String nombre_atleta = textNombre.getText();
+        String pais_atleta = textPais.getText();
+
+        float factor_notas = Float.parseFloat(Factor.getText().replace(',', '.'));
+        float nota_1 = Float.parseFloat(Nota1.getText().replace(',', '.'));
+        float nota_2 = Float.parseFloat(Nota2.getText().replace(',', '.'));
+        float nota_3 = Float.parseFloat(Nota3.getText().replace(',', '.'));
+        float nota_4 = Float.parseFloat(Nota4.getText().replace(',', '.'));
+        float nota_5 = Float.parseFloat(Nota5.getText().replace(',', '.'));
+        float nota_6 = Float.parseFloat(Nota6.getText().replace(',', '.'));
+        float nota_7 = Float.parseFloat(Nota7.getText().replace(',', '.'));
+        float nota_8 = Float.parseFloat(Nota8.getText().replace(',', '.'));
+        float valor_nota_final = 0;
+
+        try {
+            Object[] notas_natacion = { nombre_atleta, pais_atleta };
+            create("notas", notas_natacion);
+            System.out.println(read_last_id("notas", "id"));
+            ResultSet rs = read("notas", this.con);
+            while (rs.next()) {
+                int id = rs.getInt(1);
+                String nombre_a = rs.getString("nomAtleta");
+                String nombre_p = rs.getString("nomPais");
+
+                float nota1 = rs.getFloat("nota1");
+                float nota2 = rs.getFloat("nota2");
+                float nota3 = rs.getFloat("nota3");
+                float nota4 = rs.getFloat("nota4");
+                float nota5 = rs.getFloat("nota5");
+                float nota6 = rs.getFloat("nota6");
+                float nota7 = rs.getFloat("nota7");
+                float nota8 = rs.getFloat("nota8");
+                float factor = rs.getFloat("factor");
+
+                this.nat.addRow(new Object[] {
+                        nombre_a, nombre_p, nota1, nota2, nota3, nota4, nota5, nota6, nota7, nota8, factor
+
+                });
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     };
-    
-    //Funcion para el boton para calcular de la ventana 2
-void calcular(){
-        try{
-            int fila = tablaNotas.getSelectedRow();
 
+    // Funcion para el boton para calcular de la ventana 2 // Bien
+    void calcular() {
+        try {
+            int fila = tablaNotas.getSelectedRow();
 
             float factor_notas = Float.parseFloat(tablaNotas.getValueAt(fila, 10).toString());
 
@@ -1039,9 +1211,8 @@ void calcular(){
             float nota_4 = Float.parseFloat(tablaNotas.getValueAt(fila, 5).toString());
             float nota_5 = Float.parseFloat(tablaNotas.getValueAt(fila, 6).toString());
             float nota_6 = Float.parseFloat(tablaNotas.getValueAt(fila, 7).toString());
-            float nota_7 = Float.parseFloat(tablaNotas.getValueAt(fila,8).toString());
+            float nota_7 = Float.parseFloat(tablaNotas.getValueAt(fila, 8).toString());
             float nota_8 = Float.parseFloat(tablaNotas.getValueAt(fila, 9).toString());
-
 
             List<Float> lista_notas = new ArrayList<>();
             lista_notas.add(nota_1);
@@ -1053,10 +1224,10 @@ void calcular(){
             lista_notas.add(nota_7);
             lista_notas.add(nota_8);
 
-             // Eliminar las primeras dos notas y las últimas dos notas
+            // Eliminar las primeras dos notas y las últimas dos notas
             Collections.sort(lista_notas);
 
-             // Eliminar las primeras dos notas y las últimas dos notas
+            // Eliminar las primeras dos notas y las últimas dos notas
             lista_notas.subList(0, 2).clear();
             lista_notas.subList(lista_notas.size() - 2, lista_notas.size()).clear();
 
@@ -1068,21 +1239,25 @@ void calcular(){
             float resultado = suma * factor_notas;
             nat.setValueAt(resultado, fila, 11);
 
-            System.out.println(lista_notas);
+            // System.out.println(lista_notas);
 
-        }catch(Exception e){
+        } catch (Exception e) {
             System.out.println("la entrada no es un numero valido");
+        }
+    }
+    public static void main(String args[]) {
+        // Object[] valores = {"Chile", 16, 20, 30, 66};
+        // crud.create("medallas", valores);
+        CRUD crud = new CRUD();
+
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                crud.setVisible(true);
+                // ResulSet rs = read();
+
             }
-    }   
-void andres(){
-    
-}
-        
-           
-
-
-
-
+        });
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField Factor;
     private javax.swing.JTextField Nota1;

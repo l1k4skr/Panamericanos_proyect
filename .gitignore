@@ -1,3 +1,9 @@
 *.xml
 nbproject/
+<<<<<<< HEAD
 juegosPanamericanos/juegosPanamericanos/nbprnbproject/
+=======
+juegosPanamericanos/juegosPanamericanos/nbproject
+juegosPanamericanos/juegosPanamericanos/nbproject/build-impl.xml
+juegosPanamericanos/juegosPanamericanos/nbproject/build-impl.xml
+>>>>>>> e21ec09682754fe99e79894965b66f909010b42f
